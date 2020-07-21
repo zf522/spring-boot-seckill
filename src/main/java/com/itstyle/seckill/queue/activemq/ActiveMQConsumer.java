@@ -25,9 +25,9 @@ public class ActiveMQConsumer {
     	String[] array = message.split(";"); 
 		Result result = seckillService.startSeckilDBPCC_TWO(Long.parseLong(array[0]), Long.parseLong(array[1]));
 		if(result.equals(Result.ok(SeckillStatEnum.SUCCESS))){
-			WebSocketServer.sendInfo(array[0].toString(), "秒杀成功");//推送给前台
+			WebSocketServer.sendInfo(array[0], "秒杀成功");//推送给前台
 		}else{
-			WebSocketServer.sendInfo(array[0].toString(), "秒杀失败");//推送给前台
+			WebSocketServer.sendInfo(array[0], "秒杀失败");//推送给前台
 			redisUtil.cacheValue(array[0], "ok");//秒杀结束
 		}
 	}

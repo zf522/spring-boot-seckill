@@ -25,6 +25,9 @@ import com.itstyle.seckill.service.ISeckillService;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+/**
+ * 不要较真 这只是一个模拟多线程秒杀案例
+ */
 @Api(tags ="秒杀")
 @RestController
 @RequestMapping("/seckill")
@@ -39,7 +42,7 @@ public class SeckillController {
 	@Autowired
 	private ISeckillService seckillService;
 	
-	@ApiOperation(value="秒杀一(最low实现)",nickname="科帮网")
+	@ApiOperation(value="秒杀一(最low实现)",nickname="爪哇笔记")
 	@PostMapping("/start")
 	public Result start(long seckillId){
 		int skillNum = 10;
@@ -68,7 +71,7 @@ public class SeckillController {
                         LOGGER.info("用户:{}{}",userId,"哎呦喂，人也太多了，请稍后！");
                     }
                 }catch (RrException e){
-                    //e.printStackTrace();
+                    LOGGER.error("哎呀报错了{}",e.getMsg());
                 }
 				latch.countDown();
 			};

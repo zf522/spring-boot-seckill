@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import com.itstyle.seckill.common.exception.RrException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,7 +63,7 @@ public class SeckillDistributedServiceImpl implements ISeckillDistributedService
 			    return Result.error(SeckillStatEnum.MUCH);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+            throw new RrException("异常了个乖乖");
 		} finally{
 			if(res){//释放锁
 				RedissLockUtil.unlock(seckillId+"");
@@ -97,7 +98,7 @@ public class SeckillDistributedServiceImpl implements ISeckillDistributedService
 			    return Result.error(SeckillStatEnum.MUCH);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+            throw new RrException("异常了个乖乖");
 		} finally{
 			if(res){//释放锁
 				ZkLockUtil.release();
@@ -133,7 +134,7 @@ public class SeckillDistributedServiceImpl implements ISeckillDistributedService
 				return Result.error(SeckillStatEnum.MUCH);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+            throw new RrException("异常了个乖乖");
 		} finally{
 			if(res){//释放锁
 				RedissLockUtil.unlock(seckillId+"");

@@ -6,8 +6,11 @@ import com.itstyle.seckill.common.entity.Result;
 import com.itstyle.seckill.common.entity.Seckill;
 import com.itstyle.seckill.common.entity.SuccessKilled;
 import com.itstyle.seckill.common.enums.SeckillStatEnum;
+import com.itstyle.seckill.common.exception.RrException;
 import com.itstyle.seckill.repository.SeckillRepository;
 import com.itstyle.seckill.service.ISeckillService;
+import net.bytebuddy.implementation.bytecode.Throw;
+import org.apache.tomcat.jni.Thread;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -120,8 +123,8 @@ public class SeckillServiceImpl implements ISeckillService {
 				return Result.error(SeckillStatEnum.END);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-		}finally {
+			throw new RrException("异常了个乖乖");
+         }finally {
 			lock.unlock();
 		}
 		return Result.ok(SeckillStatEnum.SUCCESS);
