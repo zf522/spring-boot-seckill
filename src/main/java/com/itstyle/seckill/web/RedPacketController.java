@@ -33,7 +33,9 @@ public class RedPacketController {
 	private final static Logger LOGGER = LoggerFactory.getLogger(RedPacketController.class);
 
 	private static int corePoolSize = Runtime.getRuntime().availableProcessors();
-	//创建线程池  调整队列数 拒绝服务
+    /**
+     * 创建线程池  调整队列数 拒绝服务
+     */
 	private static ThreadPoolExecutor executor  = new ThreadPoolExecutor(corePoolSize, corePoolSize+1, 10l, TimeUnit.SECONDS,
 			new LinkedBlockingQueue<>(1000));
 
@@ -52,15 +54,11 @@ public class RedPacketController {
 	@PostMapping("/start")
 	public Result start(long redPacketId){
 		int skillNum = 100;
-		final CountDownLatch latch = new CountDownLatch(skillNum);//N个抢红包
+		final CountDownLatch latch = new CountDownLatch(skillNum);
 		/**
 		 * 初始化红包数据，抢红包拦截
 		 */
 		redisUtil.cacheValue(redPacketId+"-num",10);
-        /**
-         * 初始化剩余人数，拆红包拦截
-         */
-        redisUtil.cacheValue(redPacketId+"-restPeople",10);
         /**
          * 初始化红包金额，单位为分
          */
@@ -75,7 +73,7 @@ public class RedPacketController {
                  * 抢红包拦截，其实应该分两步，为了演示方便
                  */
 				long count = redisUtil.decr(redPacketId+"-num",1);
-				if(count>0){
+				if(count>=0){
 					Result result = redPacketService.startSeckil(redPacketId,userId);
 					Double amount = DoubleUtil.divide(Double.parseDouble(result.get("msg").toString()), (double) 100);
 					LOGGER.info("用户{}抢红包成功，金额：{}", userId,amount);
@@ -105,7 +103,7 @@ public class RedPacketController {
     @PostMapping("/startTwo")
     public Result startTwo(long redPacketId){
         int skillNum = 100;
-        final CountDownLatch latch = new CountDownLatch(skillNum);//N个抢红包
+        final CountDownLatch latch = new CountDownLatch(skillNum);
         /**
          * 初始化红包数据，抢红包拦截
          */

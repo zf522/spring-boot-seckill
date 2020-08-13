@@ -30,7 +30,7 @@ public class RedPacketService implements IRedPacketService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result startSeckil(long redPacketId,int userId) {
         Integer money = 0;
         boolean res=false;
@@ -40,17 +40,17 @@ public class RedPacketService implements IRedPacketService {
              */
             res = RedissLockUtil.tryLock(redPacketId+"", TimeUnit.SECONDS, 3, 10);
             if(res){
-                long restPeople = redisUtil.decr(redPacketId+"-restPeople",1);
+                long count = Long.parseLong(redisUtil.getValue(redPacketId+"-num").toString());
                 /**
                  * 如果是最后一人
                  */
-                if(restPeople==1){
+                if(count==0){
                     money = Integer.parseInt(redisUtil.getValue(redPacketId+"-money").toString());
                 }else{
                     Integer restMoney = Integer.parseInt(redisUtil.getValue(redPacketId+"-money").toString());
                     Random random = new Random();
                     //随机范围：[1,剩余人均金额的两倍]
-                    money = random.nextInt((int) (restMoney / (restPeople+1) * 2 - 1)) + 1;
+                    money = random.nextInt((int) (restMoney / (count+1) * 2 - 1)) + 1;
                 }
                 redisUtil.decr(redPacketId+"-money",money);
                 /**
@@ -74,7 +74,8 @@ public class RedPacketService implements IRedPacketService {
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
-            if(res){//释放锁
+            //释放锁
+            if(res){
                 RedissLockUtil.unlock(redPacketId+"");
             }
         }
@@ -82,7 +83,7 @@ public class RedPacketService implements IRedPacketService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result startTwoSeckil(long redPacketId, int userId) {
         Integer money = 0;
         boolean res=false;
@@ -130,7 +131,8 @@ public class RedPacketService implements IRedPacketService {
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
-            if(res){//释放锁
+            //释放锁
+            if(res){
                 RedissLockUtil.unlock(redPacketId+"");
             }
         }
