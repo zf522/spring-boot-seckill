@@ -9,14 +9,11 @@ import com.itstyle.seckill.common.enums.SeckillStatEnum;
 import com.itstyle.seckill.common.exception.RrException;
 import com.itstyle.seckill.repository.SeckillRepository;
 import com.itstyle.seckill.service.ISeckillService;
-import net.bytebuddy.implementation.bytecode.Throw;
-import org.apache.tomcat.jni.Thread;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -26,8 +23,9 @@ public class SeckillServiceImpl implements ISeckillService {
     /**
      * 思考：为什么不用synchronized
      * service 默认是单例的，并发下lock只有一个实例
+	 * 互斥锁 参数默认false，不公平锁
      */
-	private Lock lock = new ReentrantLock(true);//互斥锁 参数默认false，不公平锁  
+	private Lock lock = new ReentrantLock(true);
 	
 	@Autowired
 	private DynamicQuery dynamicQuery;
@@ -51,7 +49,7 @@ public class SeckillServiceImpl implements ISeckillService {
 		return ((Number) object).longValue();
 	}
 	@Override
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public void deleteSeckill(long seckillId) {
 		String nativeSql = "DELETE FROM  success_killed WHERE seckill_id=?";
 		dynamicQuery.nativeExecuteUpdate(nativeSql, new Object[]{seckillId});
@@ -59,7 +57,7 @@ public class SeckillServiceImpl implements ISeckillService {
 		dynamicQuery.nativeExecuteUpdate(nativeSql, new Object[]{seckillId});
 	}
 	@Override
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public Result startSeckil(long seckillId,long userId) {
 		//校验库存
 		String nativeSql = "SELECT number FROM seckill WHERE seckill_id=?";
@@ -74,8 +72,7 @@ public class SeckillServiceImpl implements ISeckillService {
 			killed.setSeckillId(seckillId);
 			killed.setUserId(userId);
 			killed.setState((short)0);
-			Timestamp createTime = new Timestamp(new Date().getTime());
-			killed.setCreateTime(createTime);
+			killed.setCreateTime(new Timestamp(System.currentTimeMillis()));
 			dynamicQuery.save(killed);
             /**
              * 这里仅仅是分表而已，提供一种思路，供参考，测试的时候自行建表
@@ -87,7 +84,7 @@ public class SeckillServiceImpl implements ISeckillService {
              */
             String table = "success_killed_"+userId%8;
             nativeSql = "INSERT INTO "+table+" (seckill_id, user_id,state,create_time)VALUES(?,?,?,?)";
-            Object[] params = new Object[]{seckillId,userId,(short)0,createTime};
+            Object[] params = new Object[]{seckillId,userId,(short)0,new Timestamp(System.currentTimeMillis())};
             dynamicQuery.nativeExecuteUpdate(nativeSql,params);
 			//支付
 			return Result.ok(SeckillStatEnum.SUCCESS);
@@ -96,10 +93,10 @@ public class SeckillServiceImpl implements ISeckillService {
 		}
 	}
 	@Override
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public Result  startSeckilLock(long seckillId, long userId) {
-		 try {
-			lock.lock();
+		lock.lock();
+		try {
 			/**
 			 * 1)这里、不清楚为啥、总是会被超卖101、难道锁不起作用、lock是同一个对象
 			 * 2)来自热心网友 zoain 的细心测试思考、然后自己总结了一下,事物未提交之前，锁已经释放(事物提交是在整个方法执行完)，导致另一个事物读取到了这个事物未提交的数据，也就是传说中的脏读。建议锁上移
@@ -117,7 +114,7 @@ public class SeckillServiceImpl implements ISeckillService {
 				killed.setSeckillId(seckillId);
 				killed.setUserId(userId);
 				killed.setState(Short.parseShort(number+""));
-				killed.setCreateTime(new Timestamp(new Date().getTime()));
+				killed.setCreateTime(new Timestamp(System.currentTimeMillis()));
 				dynamicQuery.save(killed);
 			}else{
 				return Result.error(SeckillStatEnum.END);
@@ -131,7 +128,7 @@ public class SeckillServiceImpl implements ISeckillService {
 	}
 	@Override
 	@Servicelock
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public Result startSeckilAopLock(long seckillId, long userId) {
 		//来自码云码友<马丁的早晨>的建议 使用AOP + 锁实现
 		String nativeSql = "SELECT number FROM seckill WHERE seckill_id=?";
@@ -144,7 +141,7 @@ public class SeckillServiceImpl implements ISeckillService {
 			killed.setSeckillId(seckillId);
 			killed.setUserId(userId);
 			killed.setState(Short.parseShort(number+""));
-			killed.setCreateTime(new Timestamp(new Date().getTime()));
+			killed.setCreateTime(new Timestamp(System.currentTimeMillis()));
 			dynamicQuery.save(killed);
 		}else{
 			return Result.error(SeckillStatEnum.END);
@@ -153,7 +150,7 @@ public class SeckillServiceImpl implements ISeckillService {
 	}
 	//注意这里 限流注解 可能会出现少买 自行调整
 	@Override
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public Result startSeckilDBPCC_ONE(long seckillId, long userId) {
 		//单用户抢购一件商品或者多件都没有问题
 		String nativeSql = "SELECT number FROM seckill WHERE seckill_id=? FOR UPDATE";
@@ -166,7 +163,7 @@ public class SeckillServiceImpl implements ISeckillService {
 			killed.setSeckillId(seckillId);
 			killed.setUserId(userId);
 			killed.setState((short)0);
-			killed.setCreateTime(new Timestamp(new Date().getTime()));
+			killed.setCreateTime(new Timestamp(System.currentTimeMillis()));
 			dynamicQuery.save(killed);
 			return Result.ok(SeckillStatEnum.SUCCESS);
 		}else{
@@ -178,7 +175,7 @@ public class SeckillServiceImpl implements ISeckillService {
      * 如果发现锁争用比较严重，如InnoDB_row_lock_waits和InnoDB_row_lock_time_avg的值比较高
      */
 	@Override
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public Result startSeckilDBPCC_TWO(long seckillId, long userId) {
 		//单用户抢购一件商品没有问题、但是抢购多件商品不建议这种写法
 		String nativeSql = "UPDATE seckill  SET number=number-1 WHERE seckill_id=? AND number>0";//UPDATE锁表
@@ -188,7 +185,7 @@ public class SeckillServiceImpl implements ISeckillService {
 			killed.setSeckillId(seckillId);
 			killed.setUserId(userId);
 			killed.setState((short)0);
-			killed.setCreateTime(new Timestamp(new Date().getTime()));
+			killed.setCreateTime(new Timestamp(System.currentTimeMillis()));
 			dynamicQuery.save(killed);
 			return Result.ok(SeckillStatEnum.SUCCESS);
 		}else{
@@ -196,11 +193,13 @@ public class SeckillServiceImpl implements ISeckillService {
 		}
 	}
 	@Override
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public Result startSeckilDBOCC(long seckillId, long userId, long number) {
 		Seckill kill = seckillRepository.findOne(seckillId);
-		//if(kill.getNumber()>0){
-		if(kill.getNumber()>=number){//剩余的数量应该要大于等于秒杀的数量
+		/**
+		 * 剩余的数量应该要大于等于秒杀的数量
+		 */
+		if(kill.getNumber()>=number){
 			//乐观锁
 			String nativeSql = "UPDATE seckill  SET number=number-?,version=version+1 WHERE seckill_id=? AND version = ?";
 			int count = dynamicQuery.nativeExecuteUpdate(nativeSql, new Object[]{number,seckillId,kill.getVersion()});
@@ -209,7 +208,7 @@ public class SeckillServiceImpl implements ISeckillService {
 				killed.setSeckillId(seckillId);
 				killed.setUserId(userId);
 				killed.setState((short)0);
-				killed.setCreateTime(new Timestamp(new Date().getTime()));
+				killed.setCreateTime(new Timestamp(System.currentTimeMillis()));
 				dynamicQuery.save(killed);
 				return Result.ok(SeckillStatEnum.SUCCESS);
 			}else{

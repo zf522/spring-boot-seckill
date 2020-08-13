@@ -1,5 +1,6 @@
 package com.itstyle.seckill.web;
 
+import com.itstyle.seckill.common.enums.SeckillStatEnum;
 import com.itstyle.seckill.common.exception.RrException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -35,7 +36,9 @@ public class SeckillController {
 	private final static Logger LOGGER = LoggerFactory.getLogger(SeckillController.class);
 	
 	private static int corePoolSize = Runtime.getRuntime().availableProcessors();
-	//创建线程池  调整队列数 拒绝服务
+	/**
+	 * 创建线程池  调整队列数 拒绝服务
+	 */
 	private static ThreadPoolExecutor executor  = new ThreadPoolExecutor(corePoolSize, corePoolSize+1, 10l, TimeUnit.SECONDS,
 			new LinkedBlockingQueue<>(1000));
 	
@@ -46,7 +49,7 @@ public class SeckillController {
 	@PostMapping("/start")
 	public Result start(long seckillId){
 		int skillNum = 10;
-		final CountDownLatch latch = new CountDownLatch(skillNum);//N个购买者
+		final CountDownLatch latch = new CountDownLatch(skillNum);
 		seckillService.deleteSeckill(seckillId);
 		final long killId =  seckillId;
 		LOGGER.info("开始秒杀一(会出现超卖)");
@@ -90,7 +93,7 @@ public class SeckillController {
 	@PostMapping("/startLock")
 	public Result startLock(long seckillId){
 		int skillNum = 1000;
-		final CountDownLatch latch = new CountDownLatch(skillNum);//N个购买者
+		final CountDownLatch latch = new CountDownLatch(skillNum);
 		seckillService.deleteSeckill(seckillId);
 		final long killId =  seckillId;
 		LOGGER.info("开始秒杀二(正常)");
@@ -116,7 +119,7 @@ public class SeckillController {
 	@PostMapping("/startAopLock")
 	public Result startAopLock(long seckillId){
 		int skillNum = 1000;
-		final CountDownLatch latch = new CountDownLatch(skillNum);//N个购买者
+		final CountDownLatch latch = new CountDownLatch(skillNum);
 		seckillService.deleteSeckill(seckillId);
 		final long killId =  seckillId;
 		LOGGER.info("开始秒杀三(正常)");
@@ -142,7 +145,7 @@ public class SeckillController {
 	@PostMapping("/startDBPCC_ONE")
 	public Result startDBPCC_ONE(long seckillId){
 		int skillNum = 1000;
-		final CountDownLatch latch = new CountDownLatch(skillNum);//N个购买者
+		final CountDownLatch latch = new CountDownLatch(skillNum);
 		seckillService.deleteSeckill(seckillId);
 		final long killId =  seckillId;
 		LOGGER.info("开始秒杀四(正常)");
@@ -168,7 +171,7 @@ public class SeckillController {
 	@PostMapping("/startDPCC_TWO")
 	public Result startDPCC_TWO(long seckillId){
 		int skillNum = 1000;
-		final CountDownLatch latch = new CountDownLatch(skillNum);//N个购买者
+		final CountDownLatch latch = new CountDownLatch(skillNum);
 		seckillService.deleteSeckill(seckillId);
 		final long killId =  seckillId;
 		LOGGER.info("开始秒杀五(正常、数据库锁最优实现)");
@@ -194,7 +197,7 @@ public class SeckillController {
 	@PostMapping("/startDBOCC")
 	public Result startDBOCC(long seckillId){
 		int skillNum = 1000;
-		final CountDownLatch latch = new CountDownLatch(skillNum);//N个购买者
+		final CountDownLatch latch = new CountDownLatch(skillNum);
 		seckillService.deleteSeckill(seckillId);
 		final long killId =  seckillId;
 		LOGGER.info("开始秒杀六(正常、数据库锁最优实现)");
@@ -230,16 +233,14 @@ public class SeckillController {
 				SuccessKilled kill = new SuccessKilled();
 				kill.setSeckillId(killId);
 				kill.setUserId(userId);
-				try {
-					Boolean flag = SeckillQueue.getMailQueue().produce(kill);
-					if(flag){
-						LOGGER.info("用户:{}{}",kill.getUserId(),"秒杀成功");
-					}else{
-						LOGGER.info("用户:{}{}",userId,"秒杀失败");
-					}
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-					LOGGER.info("用户:{}{}",userId,"秒杀失败");
+				Boolean flag = SeckillQueue.getSkillQueue().produce(kill);
+				/**
+				 * 虽然进入了队列，但是不一定能秒杀成功 进队列出队有间隙
+				 */
+				if(flag){
+					//LOGGER.info("用户:{}{}",kill.getUserId(),"秒杀成功");
+				}else{
+					//LOGGER.info("用户:{}{}",userId,"秒杀失败");
 				}
 			};
 			executor.execute(task);
@@ -278,4 +279,5 @@ public class SeckillController {
 		}
 		return Result.ok();
 	}
+
 }

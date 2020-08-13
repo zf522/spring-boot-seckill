@@ -28,8 +28,12 @@ public class SeckillQueue {
          */
 		private  static SeckillQueue queue = new SeckillQueue();
     }
-    //单例队列
-    public static SeckillQueue getMailQueue(){
+
+    /**
+     * 单例队列
+     * @return
+     */
+    public static SeckillQueue getSkillQueue(){
         return SingletonHolder.queue;
     }
     /**
@@ -41,7 +45,7 @@ public class SeckillQueue {
      * offer(e) 队列未满时，返回true；队列满时返回false。非阻塞立即返回。
      * offer(e, time, unit) 设定等待的时间，如果在指定时间内还不能往队列中插入数据则返回false，插入成功返回true。 
      */
-    public  Boolean  produce(SuccessKilled kill) throws InterruptedException {
+    public  Boolean  produce(SuccessKilled kill) {
     	return blockingQueue.offer(kill);
     }
     /**
@@ -52,7 +56,11 @@ public class SeckillQueue {
     public  SuccessKilled consume() throws InterruptedException {
         return blockingQueue.take();
     }
-    // 获取队列大小
+
+    /**
+     * 获取队列大小
+     * @return
+     */
     public int size() {
         return blockingQueue.size();
     }

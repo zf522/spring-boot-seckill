@@ -164,7 +164,7 @@ public class RedPacketController {
     @PostMapping("/startThree")
     public Result startThree(long redPacketId){
         int skillNum = 9;
-        final CountDownLatch latch = new CountDownLatch(skillNum);//N个抢红包
+        final CountDownLatch latch = new CountDownLatch(skillNum);
         /**
          * 初始化红包数据，抢红包拦截
          */
