@@ -177,8 +177,10 @@ public class SeckillServiceImpl implements ISeckillService {
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public Result startSeckilDBPCC_TWO(long seckillId, long userId) {
-		//单用户抢购一件商品没有问题、但是抢购多件商品不建议这种写法
-		String nativeSql = "UPDATE seckill  SET number=number-1 WHERE seckill_id=? AND number>0";//UPDATE锁表
+		/**
+		 * 单用户抢购一件商品没有问题、但是抢购多件商品不建议这种写法 UPDATE锁表
+		 */
+		String nativeSql = "UPDATE seckill  SET number=number-1 WHERE seckill_id=? AND number>0";
 		int count = dynamicQuery.nativeExecuteUpdate(nativeSql, new Object[]{seckillId});
 		if(count>0){
 			SuccessKilled killed = new SuccessKilled();
