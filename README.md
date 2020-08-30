@@ -7,6 +7,16 @@
 
  **墙裂推荐，一个能够让程序猿快速开发的极简工具箱：https://gitee.com/52itstyle/SPTools** 
 
+## 分库分表案例
+
+[1）分表案例](https://gitee.com/52itstyle/spring-boot-sharding-sphere/tree/master/sub-table)
+
+[2）分库分表案例](https://gitee.com/52itstyle/spring-boot-sharding-sphere/tree/master/sub-db-table)
+
+[3）读写分离案例](https://gitee.com/52itstyle/spring-boot-sharding-sphere/tree/master/db-read-write)
+
+[4）分库分表读写分离案例](https://gitee.com/52itstyle/spring-boot-sharding-sphere/tree/master/sub-db-table-read-write)
+
 ## 抢红包案例
 
 [微信高并发抢红包秒杀实战案例](https://blog.52itstyle.vip/archives/5103/)
