@@ -64,12 +64,6 @@ win环境redis：https://gitee.com/52itstyle/spring-boot-seckill/tree/master/src
 
 - 本测试案例单纯为了学习，某些案例并不适用于生产环境，大家根据所需自行调整。
 
-
-
-## 云服务推荐
-
-[![输入图片说明](https://images.gitee.com/uploads/images/2020/0609/222359_e44f1a3f_87650.jpeg "屏幕截图.png")](https://www.aliyun.com/activity/618/index?userCode=kutpfdo3)
-
 ## 测试入口
 
 http://localhost:8080/seckill/swagger-ui.html
