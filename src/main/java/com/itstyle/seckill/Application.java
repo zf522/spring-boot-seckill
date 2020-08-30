@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
  * API接口测试：http://localhost:8080/seckill/swagger-ui.html
  * 跑之前 一定要看文库：https://gitee.com/52itstyle/spring-boot-seckill/wikis
  * 妹子图微服务版本：https://gitee.com/52itstyle/SPTools-Cloud
+ * 分库分表案例：https://gitee.com/52itstyle/spring-boot-sharding-sphere
  */
 @EnableAsync
 @SpringBootApplication
