@@ -180,4 +180,45 @@ public class SeckillDistributedController {
 		}
 		return Result.ok();
 	}
+
+    @ApiOperation(value="秒杀六(Redis原子递减)",nickname="爪哇笔记")
+    @PostMapping("/startRedisCount")
+    public Result startRedisCount(long secKillId){
+        /**
+         * 还原数据
+         */
+        seckillService.deleteSeckill(secKillId);
+        int count = 1000;
+        /**
+         * 初始化商品个数
+         */
+        redisUtil.cacheValue(secKillId+"-num",100);
+        final long killId =  secKillId;
+        LOGGER.info("开始秒杀六");
+        for(int i=0;i<count;i++){
+            final long userId = i;
+            Runnable task = () -> {
+                /**
+                 * 原子递减
+                 */
+                long number = redisUtil.decr(secKillId+"-num",1);
+                if(number>=0){
+                    seckillService.startSeckilAopLock(secKillId, userId);
+                    LOGGER.info("用户:{}秒杀商品成功",userId);
+                }else{
+                    LOGGER.info("用户:{}秒杀商品失败",userId);
+                }
+            };
+            executor.execute(task);
+        }
+        try {
+            Thread.sleep(10000);
+            redisUtil.cacheValue(killId+"", null);
+            Long  secKillCount = seckillService.getSeckillCount(secKillId);
+            LOGGER.info("一共秒杀出{}件商品",secKillCount);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return Result.ok();
+    }
 }

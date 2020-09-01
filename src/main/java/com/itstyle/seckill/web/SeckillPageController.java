@@ -1,5 +1,6 @@
 package com.itstyle.seckill.web;
 
+import com.itstyle.seckill.common.redis.RedisUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -9,6 +10,8 @@ import javax.jms.Destination;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.activemq.command.ActiveMQQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -30,12 +33,17 @@ import com.itstyle.seckill.service.ISeckillService;
 @RestController
 @RequestMapping("/seckillPage")
 public class SeckillPageController {
-	
-	@Autowired
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(SeckillPageController.class);
+
+    @Autowired
 	private ISeckillService seckillService;
 	
 	@Autowired
 	private ActiveMQSender activeMQSender;
+
+    @Autowired
+    private RedisUtil redisUtil;
 	
 	@Autowired
 	private HttpClient httpClient;
@@ -81,5 +89,21 @@ public class SeckillPageController {
         }else{
         	return Result.error("验证失败");
         }
+    }
+
+    @ApiOperation(value="最佳实践)",nickname="爪哇笔记")
+    @PostMapping("/startRedisCount")
+    public Result startRedisCount(long secKillId,long userId){
+        /**
+         * 原子递减
+         */
+        long number = redisUtil.decr(secKillId+"-num",1);
+        if(number>=0){
+            seckillService.startSeckilDBPCC_TWO(secKillId, userId);
+            LOGGER.info("用户:{}秒杀商品成功",userId);
+        }else{
+            LOGGER.info("用户:{}秒杀商品失败",userId);
+        }
+        return Result.ok();
     }
 }
