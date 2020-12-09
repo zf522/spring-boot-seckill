@@ -47,6 +47,7 @@ public class RedPacketController {
 
     /**
      * 抢红包 拆红包 抢到基本能拆到
+     * 建议使用抢红包二的方式
      * @param redPacketId
      * @return
      */
@@ -59,6 +60,10 @@ public class RedPacketController {
 		 * 初始化红包数据，抢红包拦截
 		 */
 		redisUtil.cacheValue(redPacketId+"-num",10);
+        /**
+         * 初始化剩余人数，拆红包拦截
+         */
+        redisUtil.cacheValue(redPacketId+"-restPeople",10);
         /**
          * 初始化红包金额，单位为分
          */

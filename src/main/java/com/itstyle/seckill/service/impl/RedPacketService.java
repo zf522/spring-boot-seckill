@@ -40,17 +40,17 @@ public class RedPacketService implements IRedPacketService {
              */
             res = RedissLockUtil.tryLock(redPacketId+"", TimeUnit.SECONDS, 3, 10);
             if(res){
-                long count = Long.parseLong(redisUtil.getValue(redPacketId+"-num").toString());
+                long restPeople = redisUtil.decr(redPacketId+"-restPeople",1);
                 /**
                  * 如果是最后一人
                  */
-                if(count==0){
+                if(restPeople==0){
                     money = Integer.parseInt(redisUtil.getValue(redPacketId+"-money").toString());
                 }else{
                     Integer restMoney = Integer.parseInt(redisUtil.getValue(redPacketId+"-money").toString());
                     Random random = new Random();
                     //随机范围：[1,剩余人均金额的两倍]
-                    money = random.nextInt((int) (restMoney / (count+1) * 2 - 1)) + 1;
+                    money = random.nextInt((int) (restMoney / (restPeople+1) * 2 - 1)) + 1;
                 }
                 redisUtil.decr(redPacketId+"-money",money);
                 /**
