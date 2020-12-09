@@ -1,7 +1,7 @@
 # 分布式秒杀系统
 
 
-交流群：529135840
+交流群：933593697
 
 小伙伴们运行前一定要看文档说明：https://gitee.com/52itstyle/spring-boot-seckill/wikis
 
@@ -154,15 +154,15 @@ SpringBoot开发案例从0到1构建分布式秒杀系统，项目案例基本�
 
 ## 数据采集监控
 
-[分布式跟踪工具Pinpoint初探](https://blog.52itstyle.com/archives/2806/)
+[分布式跟踪工具Pinpoint初探](https://blog.52itstyle.vip/archives/2806/)
 
-[Grafana+Telegraf+Influxdb监控Tomcat集群方案](https://blog.52itstyle.com/archives/3208/)
+[Grafana+Telegraf+Influxdb监控Tomcat集群方案](https://blog.52itstyle.vip/archives/3208/)
 
-[Grafana+Prometheus系统监控之MySql](https://blog.52itstyle.com/archives/2059/)
+[Grafana+Prometheus系统监控之MySql](https://blog.52itstyle.vip/archives/2059/)
 
-[Grafana+Prometheus系统监控之Redis](https://blog.52itstyle.com/archives/2049/)
+[Grafana+Prometheus系统监控之Redis](https://blog.52itstyle.vip/archives/2049/)
 
-[Grafana+Prometheus系统监控之SpringBoot](https://blog.52itstyle.com/archives/2143/)
+[Grafana+Prometheus系统监控之SpringBoot](https://blog.52itstyle.vip/archives/2143/)
 
 [阿里巴巴 Sentinel + InfluxDB + Chronograf 实现监控大屏](https://blog.52itstyle.vip/archives/4496/)
 
